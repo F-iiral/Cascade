@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tavern</title>
+    <!-- Normally you shouldn't import all of this manually but there is only this page so it is "fine"-->
+    <link rel="stylesheet" href="static/styles/style.css">
+    <link rel="stylesheet" href='https://fonts.googleapis.com/css?family=Roboto Mono'>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=search"/>
+    <script type="importmap"> {"imports": { 
+        "react": "https://cdn.skypack.dev/react@17.0.1",
+        "react-dom": "https://cdn.skypack.dev/react-dom@17.0.1",
+        "highlight.js": "https://cdn.skypack.dev/highlight.js@11.11.1"
+    }}</script>
+    <script>const exports = {};</script>
+    <script src="static/scripts/main.js" type="module"></script>
+</head>
+<body>
+    <div id="sidebar" class="sidebar">
+
+    </div>
+    <div id="contentContainer" class="container, content">
+        <div id="content">
+            <div id="newMessage"></div>
+        </div>
+        <div id="inputContainer" class="inputContainer">
+            <input type="text" id="messageInput" class="inputBar" placeholder="Type a message..." />
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+</body>
+</html>
