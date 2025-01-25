@@ -1,8 +1,9 @@
 from __future__ import annotations
-from private.message_wrapper import MessageWrapper
+from private.common.message_wrapper import MessageWrapper
+from private.common.character import Character
 from flask import Flask
 from flask_sock import Sock, Server
-from ollama import Client
+from ollama import Client, Message
 import json
 import asyncio
 import threading
@@ -27,6 +28,11 @@ class TavernServer:
         self.flask_sock = Sock(self.flask_app)
         self.ws: Server = None
 
+        base_assistance = Character("Personal AI Assistant", "You are a personal AI assistant.")
+
+        self.llama_current_character = base_assistance
+        self.llama_characters = [base_assistance]
+
         self.llama_current_model = "deepseek-r1:7b"
         self.llama_models = [
             "deepseek-r1:7b", "deepseek-r1:14b"
@@ -41,6 +47,8 @@ class TavernServer:
 
     async def __run_model_stream(self):
         messages=[i.message for i in self.llama_messages.values()]
+        intro_text = f"You are {self.llama_current_character.name}.\n {self.llama_current_character.description}"
+        messages.insert(-1, Message(role="system", content=intro_text))
 
         stream = self.llama_client.chat(
             model=self.llama_current_model,
@@ -52,7 +60,7 @@ class TavernServer:
         for chunk in stream:
             content: str = chunk['message']['content']
             total_content += content
-            self.ws.send(json.dumps({"action": "message", "content": content, "author": "Assistant"}))
+            self.ws.send(json.dumps({"action": "message", "content": content, "author": self.llama_current_character.name}))
 
             if not self.ws.connected:
                 self.ws.close(1000)
@@ -60,6 +68,6 @@ class TavernServer:
             if not self.running:
                 break
             if chunk.done:
-                new_message = MessageWrapper(role="assistant", content=total_content, author="Assistant")
-                self.llama_messages[new_message.timestamp] = new_message
-                self.ws.send(json.dumps({"action": "done"}))
+                new_message = MessageWrapper(role="assistant", content=total_content, author=self.llama_current_character.name)
+                self.llama_messages[new_message.id] = new_message
+                self.ws.send(json.dumps({"action": "done", "id": new_message.id}))

@@ -4,14 +4,14 @@ from typing import Literal
 import time
 
 class MessageWrapper:
-    def __init__(self, role: Literal['user', 'assistant', 'system', 'tool'], content: str, author: str, timestamp: float|None=None):
+    def __init__(self, role: Literal['user', 'assistant', 'system', 'tool'], content: str, author: str, id: float|None=None):
         self.message: Message = Message(role=role, content=content)
         self.author = author
 
-        if timestamp != None:
-            self.timestamp = timestamp
+        if id != None:
+            self.id = id
         else:
-            self.timestamp = time.time()
+            self.id = int(time.time())
 
     def to_json(self) -> dict:
         return {
@@ -20,5 +20,5 @@ class MessageWrapper:
                 "content": self.message.content
             },
             "author": self.author,
-            "timestamp": self.timestamp
+            "id": self.id
         }

@@ -69,7 +69,7 @@ function parseDefaultText(text) {
 function parseCodeBlockText(text) {
     text = text.replaceAll("```", "");
     const languages = text.match(/^.*$/m);
-    const language = languages ? languages[0] : "";
+    const language = languages ? languages[0] : "plaintext";
     const highlightedText = hljs.highlight(text, { language: language }).value;
     const regex = /$\n|[^\n]+/gm;
     const parts = highlightedText.match(regex);
