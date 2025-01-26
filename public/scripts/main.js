@@ -1,5 +1,5 @@
 import { createMessageElement } from "./message.js";
-import { loadAllMessages } from "./listeners.js";
+import { loadAllMessages, loadAllConversations } from "./listeners.js";
 
 const socket = new WebSocket("ws://" + window.location.host + "/ws");
 
@@ -63,4 +63,5 @@ function checkCondition() {
 
 // Startup
 loadAllMessages();
+loadAllConversations();
 setInterval(checkCondition, 100);

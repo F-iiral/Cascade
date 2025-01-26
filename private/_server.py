@@ -1,6 +1,8 @@
 from __future__ import annotations
 from private.common.message_wrapper import MessageWrapper
 from private.common.character import Character
+from private.database import Database
+from private.common.conversation import Conversation
 from flask import Flask
 from flask_sock import Sock, Server
 from ollama import Client, Message
@@ -23,15 +25,20 @@ class TavernServer:
     def __init__(self):
         self.running: bool = True
         self.llama_client = Client()
-        self.llama_messages: dict[float, MessageWrapper] = {}
         self.flask_app = Flask(__name__)
         self.flask_sock = Sock(self.flask_app)
         self.ws: Server = None
+        self.db: Database = Database.get()
 
-        base_assistance = Character("Personal AI Assistant", "You are a personal AI assistant.")
+        self.llama_characters = {x.id:x for x in self.db.get_all_characters()}
+        if len(self.llama_characters) == 0:
+            base_assistant = Character("Personal AI Assistant", "You are a personal AI assistant.")
+            self.llama_characters[base_assistant.id] = base_assistant
+            self.db.save_character(base_assistant)
+        self.llama_current_character = list(self.llama_characters.values())[0]
 
-        self.llama_current_character = base_assistance
-        self.llama_characters = [base_assistance]
+        self.conversations = self.db.get_all_conversations()
+        self.conversation = Conversation([self.llama_current_character], {})
 
         self.llama_current_model = "deepseek-r1:7b"
         self.llama_models = [
@@ -46,7 +53,7 @@ class TavernServer:
         _thread.start()
 
     async def __run_model_stream(self):
-        messages=[i.message for i in self.llama_messages.values()]
+        messages=[i.message for i in self.conversation.messages.values()]
         intro_text = f"You are {self.llama_current_character.name}.\n {self.llama_current_character.description}"
         messages.insert(-1, Message(role="system", content=intro_text))
 
@@ -69,5 +76,5 @@ class TavernServer:
                 break
             if chunk.done:
                 new_message = MessageWrapper(role="assistant", content=total_content, author=self.llama_current_character.name)
-                self.llama_messages[new_message.id] = new_message
+                self.conversation.messages[new_message.id] = new_message
                 self.ws.send(json.dumps({"action": "done", "id": new_message.id}))

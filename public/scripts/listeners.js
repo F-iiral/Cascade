@@ -200,6 +200,44 @@ export function loadAllMessages() {
     });
 }
 
+export function loadAllConversations() {
+    const parent = document.getElementById("content")
+
+    fetch('api/account/conversation', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json()
+    })
+    .then(data => {
+        console.log(data)
+        // for (let message of data) {
+        //     if (message.message.content == "")
+        //         continue
+            
+        //     const containerDiv = document.createElement("div")
+        //     const messageElement = createMessageElement(message.author, message.message.content, message.id, message.message.role == "user" ? "right" : "left");
+        //     containerDiv.appendChild(messageElement)
+        //     containerDiv.id = ""
+
+        //     parent.append(containerDiv)
+        // }
+
+        // const newMessage = document.createElement("div");
+        // newMessage.id = "newMessage";
+        // parent.append(newMessage)
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
+}
+
 // Clear Chat
 document.getElementById('clearButton').addEventListener('click', () => {
     fetch('api/conversation/clear', {

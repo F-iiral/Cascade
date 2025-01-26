@@ -10,6 +10,7 @@ def handle_shutdown(signum, frame):
     print(f"Shutting down due to signal {signum}")
 
     tavern = TavernServer.get()
+    tavern.db.save_conversation(tavern.conversation)
     tavern.running = False
     
     subprocess.run(f"ollama stop {tavern.llama_current_model}")
