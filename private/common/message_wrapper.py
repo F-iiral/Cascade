@@ -9,9 +9,9 @@ class MessageWrapper:
         self.author = author
 
         if id != None:
-            self.id = id
+            self._id = id
         else:
-            self.id = int(time.time())
+            self._id = int(time.time())
 
     def to_json(self) -> dict:
         return {
@@ -20,5 +20,5 @@ class MessageWrapper:
                 "content": self.message.content
             },
             "author": self.author,
-            "id": self.id
+            "id": self._id
         }

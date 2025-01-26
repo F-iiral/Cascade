@@ -30,15 +30,15 @@ class TavernServer:
         self.ws: Server = None
         self.db: Database = Database.get()
 
-        self.llama_characters = {x.id:x for x in self.db.get_all_characters()}
+        self.llama_characters = {x._id:x for x in self.db.get_all_characters()}
         if len(self.llama_characters) == 0:
             base_assistant = Character("Personal AI Assistant", "You are a personal AI assistant.")
-            self.llama_characters[base_assistant.id] = base_assistant
+            self.llama_characters[base_assistant._id] = base_assistant
             self.db.save_character(base_assistant)
         self.llama_current_character = list(self.llama_characters.values())[0]
 
         self.conversations = self.db.get_all_conversations()
-        self.conversation = Conversation([self.llama_current_character], {})
+        self.conversation = Conversation([self.llama_current_character], {}, "New Conversation")
 
         self.llama_current_model = "deepseek-r1:7b"
         self.llama_models = [
@@ -76,5 +76,5 @@ class TavernServer:
                 break
             if chunk.done:
                 new_message = MessageWrapper(role="assistant", content=total_content, author=self.llama_current_character.name)
-                self.conversation.messages[new_message.id] = new_message
-                self.ws.send(json.dumps({"action": "done", "id": new_message.id}))
+                self.conversation.messages[new_message._id] = new_message
+                self.ws.send(json.dumps({"action": "done", "_id": new_message._id}))

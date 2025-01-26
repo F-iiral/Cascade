@@ -5,6 +5,7 @@ from private.common.conversation import Conversation
 from private.database import Database
 from flask import render_template, request
 from flask_sock import Server
+from simple_websocket import ConnectionClosed
 import json
 import copy
 
@@ -28,10 +29,10 @@ def send_message():
         data_author = data["author"]
 
         new_message = MessageWrapper(role="user", content=data_content, author=data_author)
-        tavern.conversation.messages[new_message.id] = new_message
+        tavern.conversation.messages[new_message._id] = new_message
         tavern.run_model_stream()
 
-        return json.dumps({"id": new_message.id}), 200
+        return json.dumps({"id": new_message._id}), 200
     except KeyError:
         return "", 400
     except:
@@ -98,26 +99,48 @@ def get_all_conversation():
     encoded = json.dumps([i.to_json() for i in conversations])
     return encoded, 200
 
-@tavern.flask_app.route("/api/account/conversation", methods=["POST"])
+@tavern.flask_app.route("/api/account/conversation/create", methods=["POST"])
 def create_new_conversation():
     try:
         data = json.loads(request.data)
         data_character_ids = data["characters"]
 
-        loaded_characters = []
-        for character_id in data_character_ids:
-            new_character = database.get_character(character_id)
-            if new_character != None:
-                loaded_characters.append(new_character)
+        # TODO: Properly add this
+        if data_character_ids != None:
+            loaded_characters = []
+            for character_id in data_character_ids:
+                new_character = database.get_character(character_id)
+                if new_character != None:
+                    loaded_characters.append(new_character)
+        else:
+            loaded_characters = [tavern.llama_current_character]
 
-        old_conversation = Conversation(characters=[tavern.llama_current_character], messages=tavern.conversation.messages)
-        database.save_conversation(old_conversation)
+        if tavern.conversation.messages != {}:
+            database.save_conversation(tavern.conversation)
 
-        new_conversation = Conversation(characters=loaded_characters, messages={})
-        tavern.conversation.messages = []
+        new_conversation = Conversation(characters=loaded_characters, messages={}, name="New Conversation")
+        tavern.conversation = new_conversation
         tavern.llama_current_character = loaded_characters[0]
 
         return json.dumps(new_conversation.to_json()), 200
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
+
+@tavern.flask_app.route("/api/account/conversation/switch", methods=["POST"])
+def switch_to_conversation():
+    try:
+        data = json.loads(request.data)
+        data_id = data["id"]
+
+        if tavern.conversation.messages != {}:
+            database.save_conversation(tavern.conversation)
+        
+        new_conversation = database.get_conversation(data_id)
+        tavern.conversation = new_conversation
+
+        return "", 200
     except KeyError:
         return "", 400
     except:
@@ -128,10 +151,13 @@ def websocket_route(ws: Server):
     tavern.ws = ws
 
     while tavern.running:
-        user_input = tavern.ws.receive()
-        if user_input:
-            print(f"Message from client: {user_input}")
+        try:
+            user_input = tavern.ws.receive()
+            if user_input:
+                print(f"Message from client: {user_input}")
 
-        new_message = MessageWrapper(role="user", content=user_input, author="Assistant")
-        tavern.conversation.messages[new_message.id] = new_message
-        tavern.run_model_stream()
+            new_message = MessageWrapper(role="user", content=user_input, author="Assistant")
+            tavern.conversation.messages[new_message._id] = new_message
+            tavern.run_model_stream()
+        except ConnectionClosed:
+            pass

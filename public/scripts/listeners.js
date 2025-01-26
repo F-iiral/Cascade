@@ -1,5 +1,6 @@
 import { createMessageElement } from "./message.js";
 import { setUserTurnState } from "./main.js";
+import { createConversationElement } from "./conversations.js";
 
 // Send Messages
 document.getElementById('sendButton').addEventListener('click', () => {
@@ -37,6 +38,37 @@ document.getElementById('sendButton').addEventListener('click', () => {
         console.error('Error sending message:', error);
     });
 });
+
+// Clear Chat
+document.getElementById('clearButton').addEventListener('click', clearMessages);
+
+// Start new Conversation
+document.getElementById('newConversationButton').addEventListener('click', () => {
+    clearMessagesLocally();
+
+    fetch('api/account/conversation/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(
+            { 
+                characters: null, // TODO: This needs to send over a list of characters
+            }
+        )
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        setUserTurnState(true);
+        return response.json();
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
+});
+
 
 export function createNewMessage(messageElement) {
     const grandParent = document.getElementById("content");
@@ -158,13 +190,12 @@ export function retryMessage(id) {
         console.error('Error sending message:', error);
     });
 
-    const parent = document.getElementById("content");
-    parent.innerHTML = "";
     loadAllMessages();
 }
 
 export function loadAllMessages() {
     const parent = document.getElementById("content")
+    parent.innerHTML = "";
 
     fetch('api/conversation/messages', {
         method: 'GET',
@@ -201,7 +232,7 @@ export function loadAllMessages() {
 }
 
 export function loadAllConversations() {
-    const parent = document.getElementById("content")
+    const parent = document.getElementById("sidebar")
 
     fetch('api/account/conversation', {
         method: 'GET',
@@ -217,29 +248,56 @@ export function loadAllConversations() {
     })
     .then(data => {
         console.log(data)
-        // for (let message of data) {
-        //     if (message.message.content == "")
-        //         continue
-            
-        //     const containerDiv = document.createElement("div")
-        //     const messageElement = createMessageElement(message.author, message.message.content, message.id, message.message.role == "user" ? "right" : "left");
-        //     containerDiv.appendChild(messageElement)
-        //     containerDiv.id = ""
 
-        //     parent.append(containerDiv)
-        // }
+        for (let conversation of data) {
+            if (conversation == {})
+                continue
+         
+            const containerDiv = document.createElement("div")
+            const messageElement = createConversationElement(conversation.id, conversation.name, conversation.characters);
+            containerDiv.appendChild(messageElement)
+            containerDiv.id = conversation.id
 
-        // const newMessage = document.createElement("div");
-        // newMessage.id = "newMessage";
-        // parent.append(newMessage)
+            parent.append(containerDiv)
+        }
+
+        const newConversation = document.createElement("div");
+        newConversation.id = "newConversation";
+        parent.append(newConversation)
     })
     .catch(error => {
         console.error('Error sending message:', error);
     });
 }
 
-// Clear Chat
-document.getElementById('clearButton').addEventListener('click', () => {
+export function switchConversation(id) {
+    clearMessagesLocally();
+
+    fetch('api/account/conversation/switch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(
+            {
+                "id": id
+            }
+        )
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        // This is a stupid way to do this but it is just on localhost so who cares :3
+        loadAllMessages();
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
+}
+
+export function clearMessages() {
     fetch('api/conversation/clear', {
         method: 'DELETE',
         headers: {
@@ -250,10 +308,19 @@ document.getElementById('clearButton').addEventListener('click', () => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        const grandParent = document.getElementById("content");
-        grandParent.innerHTML = "";
+        clearMessagesLocally();
     })
     .catch(error => {
         console.error('Error sending message:', error);
     });
-});
+}
+export function clearMessagesLocally() {
+    const parent = document.getElementById("content");
+    parent.innerHTML = "";
+
+    const newMessage = document.createElement("div");
+    newMessage.id = "newMessage";
+    parent.append(newMessage)
+
+    setUserTurnState(true);
+}

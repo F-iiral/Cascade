@@ -1,7 +1,6 @@
 from private._server import TavernServer
 from private.router import *
 import threading
-import sys
 import signal
 import subprocess
 import time
@@ -10,11 +9,12 @@ def handle_shutdown(signum, frame):
     print(f"Shutting down due to signal {signum}")
 
     tavern = TavernServer.get()
-    tavern.db.save_conversation(tavern.conversation)
+    if tavern.conversation.messages != {}:
+        tavern.db.save_conversation(tavern.conversation)
     tavern.running = False
     
     subprocess.run(f"ollama stop {tavern.llama_current_model}")
-    sys.exit(0)
+    exit(0)
 
 if __name__ == "__main__":
     tavern = TavernServer.get()

@@ -1,4 +1,5 @@
 :root {
+    --true-white: #ffffff;
     --white: #dddddd;
     --grey-lightest: #3C3C3C;
     --grey-lighter: #323232;
@@ -15,6 +16,7 @@
     --yellow-medium: #FE4;
     --orange-medium: #D71;
     --red-medium: #D22;
+    --red-strong: #e11;
 }
 
 body {
@@ -35,7 +37,7 @@ body {
     margin-right: 16px;
     padding-right: 16px;
     padding-left: 16px;
-    min-width: 15vw;
+    width: 15vw;
     height: 100%;
     position: fixed;
 }
@@ -75,11 +77,16 @@ body {
 }
 
 .button {
+    cursor: pointer;
     background: transparent;
     color: var(--white);
     border: none;
 }
+.button:hover {
+    color: var(--true-white);
+}
 .dangerous-button {
+    cursor: pointer;
     background: transparent;
     color: var(--red-medium);
     border: none;
@@ -101,6 +108,38 @@ body {
 .message-content {
     font-size: 1em;
     word-wrap: break-word;
+}
+
+.new-conversation-button-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center;
+}
+.conversation-button-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--grey-medium);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.conversation-button-container:hover {
+    background-color: var(--grey-light);
+}
+.conversation-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: var(--white);
+    overflow-x: clip;
+}
+.conversation-characters {
+    font-size: 0.85em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #bdbdbd;
 }
 
 a {
