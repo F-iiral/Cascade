@@ -1,5 +1,5 @@
 import { createMessageElement } from "./message.js";
-import { setUserTurnState } from "./main.js";
+import { getConversationId, setConversationId, setUserTurnState } from "./main.js";
 import { createConversationElement } from "./conversations.js";
 
 // Send Messages
@@ -61,8 +61,11 @@ document.getElementById('newConversationButton').addEventListener('click', () =>
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        setUserTurnState(true);
         return response.json();
+    })
+    .then(data => {
+        setUserTurnState(true);
+        setConversationId(data.id);
     })
     .catch(error => {
         console.error('Error sending message:', error);
@@ -124,14 +127,14 @@ export function editMessage(id) {
     input.cols = 5;
     input.wrap = "hard";
     input.spellcheck = "true";
-    input.style.minWidth = "44vw";
+    input.style.minWidth = "49vw";
 
     message.textContent = "";
     message.appendChild(input);
 
     const sendButton = document.createElement('button');
     sendButton.className = "button"
-    sendButton.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+    sendButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">edit</span>';
     sendButton.onclick = () =>  {
         const updatedContent = input.value;
 
@@ -160,7 +163,7 @@ export function editMessage(id) {
     
     const cancelButton = document.createElement('button');
     cancelButton.className = "button"
-    cancelButton.innerHTML = '<span class="material-symbols-outlined">cancel</span>';
+    cancelButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span>';
     cancelButton.onclick = () => {
         message.innerHTML = originalHTMLContent;
     };
@@ -272,6 +275,7 @@ export function loadAllConversations() {
 
 export function switchConversation(id) {
     clearMessagesLocally();
+    setConversationId(id);
 
     fetch('api/account/conversation/switch', {
         method: 'POST',
@@ -291,6 +295,92 @@ export function switchConversation(id) {
         
         // This is a stupid way to do this but it is just on localhost so who cares :3
         loadAllMessages();
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
+}
+export function editConversation(id) {
+    const conversationName = document.getElementById(id.toString()).children[0].children[0];
+    const originalHTMLContent = conversationName.innerHTML;
+    const originalContent = conversationName.textContent;
+
+    const input = document.createElement('textarea');
+    input.value = originalContent;
+    input.id = `edit-${id}`;
+    input.className = "inputBar";
+    input.cols = 5;
+    input.wrap = "hard";
+    input.spellcheck = "true";
+    input.style.minWidth = "12vw";
+
+    conversationName.textContent = "";
+    conversationName.appendChild(input);
+
+    const sendButton = document.createElement('button');
+    sendButton.className = "button"
+    sendButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">edit</span>';
+    sendButton.onclick = () =>  {
+        const updatedName = input.value;
+
+        fetch('api/account/conversation', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                {
+                    "id": id,
+                    "name": updatedName
+                }
+            )
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            conversationName.textContent = updatedName;
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+        });
+    };
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.className = "button"
+    cancelButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span>';
+    cancelButton.onclick = () => {
+        conversationName.innerHTML = originalHTMLContent;
+    };
+
+    // Append the send and cancel buttons next to the input
+    conversationName.appendChild(sendButton);
+    conversationName.appendChild(cancelButton);
+}
+export function deleteConversation(id) {
+    const conversation = document.getElementById(id.toString());
+    if (conversation) {
+        conversation.remove();
+    }
+    if (id === getConversationId()) {
+        clearMessagesLocally();
+    }
+
+    fetch('api/account/conversation', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(
+            {
+                "id": id
+            }
+        )
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
     })
     .catch(error => {
         console.error('Error sending message:', error);

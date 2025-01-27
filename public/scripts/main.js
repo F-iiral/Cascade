@@ -3,6 +3,7 @@ import { loadAllMessages, loadAllConversations } from "./listeners.js";
 
 const socket = new WebSocket("ws://" + window.location.host + "/ws");
 
+let currentConversationId = 0;
 let messageBuffer = "";
 let userTurn = true;
 
@@ -11,6 +12,13 @@ export function setUserTurnState(state) {
 }
 export function getUserTurnState() {
     return userTurn;
+}
+
+export function setConversationId(id) {
+    currentConversationId = id;
+}
+export function getConversationId() {
+    return currentConversationId;
 }
 
 socket.onopen = () => {

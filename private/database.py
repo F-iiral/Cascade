@@ -98,3 +98,9 @@ class Database:
             parsed_conversations.append(new_conversation)
         
         return parsed_conversations
+      
+    def delete_character(self, id: int) -> None:
+        self.characters.delete_one({"_id": id})
+
+    def delete_conversation(self, id: int) -> None:
+        self.conversations.delete_one({"_id": id})

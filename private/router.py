@@ -73,17 +73,22 @@ def edit_message():
 
 @tavern.flask_app.route("/api/conversation/retry", methods=["POST"])
 def retry_conversation():
-    data = json.loads(request.data)
-    data_id = data["id"]
+    try:
+        data = json.loads(request.data)
+        data_id = data["id"]
 
-    messages = copy.copy(tavern.conversation.messages)
-    for message_id in messages:
-        if message_id >= data_id:
-            del tavern.conversation.messages[message_id]
-    
-    tavern.run_model_stream()
+        messages = copy.copy(tavern.conversation.messages)
+        for message_id in messages:
+            if message_id >= data_id:
+                del tavern.conversation.messages[message_id]
+        
+        tavern.run_model_stream()
 
-    return "", 200
+        return "", 200
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
 
 @tavern.flask_app.route("/api/conversation/clear", methods=["DELETE"])
 def clear_conversation():
@@ -98,6 +103,38 @@ def get_all_conversation():
 
     encoded = json.dumps([i.to_json() for i in conversations])
     return encoded, 200
+
+@tavern.flask_app.route("/api/account/conversation", methods=["DELETE"])
+def delete_conversation():
+    try:
+        data = json.loads(request.data)
+        data_id = data["id"]
+        database.delete_conversation(data_id)
+
+        return "", 200
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
+
+@tavern.flask_app.route("/api/account/conversation", methods=["PATCH"])
+def rename_conversation():
+    try:
+        data = json.loads(request.data)
+        data_id = data["id"]
+        data_name = data["name"]
+
+        conversation = database.get_conversation(data_id)
+        if conversation:
+            conversation.name = data_name
+            database.save_conversation(conversation)
+            return "", 200
+        else:
+            return "", 422
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
 
 @tavern.flask_app.route("/api/account/conversation/create", methods=["POST"])
 def create_new_conversation():
@@ -160,4 +197,6 @@ def websocket_route(ws: Server):
             tavern.conversation.messages[new_message._id] = new_message
             tavern.run_model_stream()
         except ConnectionClosed:
-            pass
+            tavern.ws = None
+            ws.close(1006)
+            del ws  # memory leak :3
