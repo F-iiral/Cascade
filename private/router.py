@@ -183,6 +183,15 @@ def switch_to_conversation():
     except:
         return "", 500
 
+@tavern.flask_app.route("/api/account/character", methods=["GET"])
+def get_all_characters():
+    characters = database.get_all_characters()
+    if characters == None or characters == []:
+        return "", 204
+
+    encoded = json.dumps([i.to_json() for i in characters])
+    return encoded, 200
+
 @tavern.flask_sock.route("/ws")
 def websocket_route(ws: Server):
     tavern.ws = ws

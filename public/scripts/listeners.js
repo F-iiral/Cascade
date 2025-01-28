@@ -1,6 +1,7 @@
 import { createMessageElement } from "./message.js";
 import { getConversationId, setConversationId, setUserTurnState } from "./main.js";
 import { createConversationElement } from "./conversations.js";
+import { createCharacterElement } from "./character.js";
 
 // Send Messages
 document.getElementById('sendButton').addEventListener('click', () => {
@@ -273,6 +274,45 @@ export function loadAllConversations() {
         const newConversation = document.createElement("div");
         newConversation.id = "newConversation";
         parent.append(newConversation)
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
+}
+
+export function loadAllCharacters() {
+    const parent = document.getElementById("character-sidebar")
+
+    fetch('api/account/character', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json()
+    })
+    .then(data => {
+        console.log(data)
+
+        for (let character of data) {
+            if (character == {})
+                continue
+         
+            const containerDiv = document.createElement("div")
+            const characterElement = createCharacterElement(character.id, character.name, character.description);
+            containerDiv.appendChild(characterElement)
+            containerDiv.id = character.id
+
+            parent.append(containerDiv)
+        }
+
+        const newCharacter = document.createElement("div");
+        newCharacter.id = "newCharacter";
+        parent.append(newCharacter)
     })
     .catch(error => {
         console.error('Error sending message:', error);

@@ -1,6 +1,7 @@
 :root {
     --true-white: #ffffff;
     --white: #dddddd;
+    --grey-even-lighter-than-lightest: #bdbdbd;
     --grey-lightest: #3C3C3C;
     --grey-lighter: #323232;
     --grey-light: #282828;
@@ -70,10 +71,25 @@ body {
     background: var(--grey-lightest);
     border-color: var(--grey-light);
     color: var(--white);
+    min-width: 11vw;
+    font-size: inherit;
+    font-family: inherit;
+}
+.input-bar-character-editor {
+    background: var(--grey-lightest);
+    border-color: var(--grey-light);
+    color: var(--white);
     min-width: 60vw;
     font-size: inherit;
     font-family: inherit;
-    min-width: 11vw;
+}
+
+.character-edit-header {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 6px;
+    color: var(--white);
+    overflow-x: clip;
 }
 
 .message-container {
@@ -161,7 +177,35 @@ body {
     font-size: 0.85em;
     font-weight: bold;
     margin-bottom: 5px;
-    color: #bdbdbd;
+    color: var(--grey-even-lighter-than-lightest);
+}
+
+.character-button-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--grey-medium);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.character-name {
+    font-size: 0.95em;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: var(--white);
+    overflow-x: clip;
+}
+.character-tagline {
+    font-size: 0.75em;
+    color: var(--grey-even-lighter-than-lightest);
+}
+
+
+hr {
+    margin-top: 16px;
+    margin-bottom: 6px;
 }
 
 a {
