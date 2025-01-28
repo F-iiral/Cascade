@@ -123,19 +123,23 @@ export function editMessage(id) {
     const input = document.createElement('textarea');
     input.value = originalContent;
     input.id = `edit-${id}`;
-    input.className = "inputBar";
+    input.className = "input-bar";
     input.cols = 5;
     input.wrap = "hard";
     input.spellcheck = "true";
-    input.style.minWidth = "49vw";
+    input.style.minWidth = "48vw";
 
     message.textContent = "";
     message.appendChild(input);
 
+    const buttonsContainer = document.createElement('div')
+    buttonsContainer.className = "button-container-vertical"
+
     const sendButton = document.createElement('button');
     sendButton.className = "button"
     sendButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">edit</span>';
-    sendButton.onclick = () =>  {
+    sendButton.onclick = (event) =>  {
+        event.stopPropagation();
         const updatedContent = input.value;
 
         fetch('api/conversation/messages', {
@@ -164,13 +168,15 @@ export function editMessage(id) {
     const cancelButton = document.createElement('button');
     cancelButton.className = "button"
     cancelButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span>';
-    cancelButton.onclick = () => {
+    cancelButton.onclick = (event) => {
+        event.stopPropagation();
         message.innerHTML = originalHTMLContent;
     };
 
     // Append the send and cancel buttons next to the input
-    message.appendChild(sendButton);
-    message.appendChild(cancelButton);
+    buttonsContainer.appendChild(sendButton);
+    buttonsContainer.appendChild(cancelButton);
+    message.appendChild(buttonsContainer);
 }
 export function retryMessage(id) {
     fetch('api/conversation/retry', {
@@ -235,7 +241,7 @@ export function loadAllMessages() {
 }
 
 export function loadAllConversations() {
-    const parent = document.getElementById("sidebar")
+    const parent = document.getElementById("conversation-sidebar")
 
     fetch('api/account/conversation', {
         method: 'GET',
@@ -308,7 +314,7 @@ export function editConversation(id) {
     const input = document.createElement('textarea');
     input.value = originalContent;
     input.id = `edit-${id}`;
-    input.className = "inputBar";
+    input.className = "input-bar-conversation";
     input.cols = 5;
     input.wrap = "hard";
     input.spellcheck = "true";
@@ -317,10 +323,15 @@ export function editConversation(id) {
     conversationName.textContent = "";
     conversationName.appendChild(input);
 
+    const outerContainer = document.createElement('div')
+    const buttonsContainer = document.createElement('div')
+    buttonsContainer.className = "button-container-vertical"
+
     const sendButton = document.createElement('button');
     sendButton.className = "button"
     sendButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">edit</span>';
-    sendButton.onclick = () =>  {
+    sendButton.onclick = (event) =>  {
+        event.stopPropagation();
         const updatedName = input.value;
 
         fetch('api/account/conversation', {
@@ -349,13 +360,16 @@ export function editConversation(id) {
     const cancelButton = document.createElement('button');
     cancelButton.className = "button"
     cancelButton.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span>';
-    cancelButton.onclick = () => {
+    cancelButton.onclick = (event) => {
+        event.stopPropagation();
         conversationName.innerHTML = originalHTMLContent;
     };
 
     // Append the send and cancel buttons next to the input
-    conversationName.appendChild(sendButton);
-    conversationName.appendChild(cancelButton);
+    buttonsContainer.appendChild(sendButton);
+    buttonsContainer.appendChild(cancelButton);
+    outerContainer.append(buttonsContainer);
+    conversationName.append(outerContainer);
 }
 export function deleteConversation(id) {
     const conversation = document.getElementById(id.toString());

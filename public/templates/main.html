@@ -18,14 +18,23 @@
 </head>
 <body>
     <div id="sidebar" class="sidebar">
-        <button class="conversation-button-container button" id="newConversationButton"><span class="material-symbols-outlined">forum</span></button>
+        <div id="" class="button-container" style="justify-content: center;">
+            <button class="conversation-button-container button" id="newConversationButton"><span class="material-symbols-outlined">forum</span></button>
+            <button class="conversation-button-container button" id="newCharacterButton"><span class="material-symbols-outlined">article_person</span></button>
+            <button class="conversation-button-container button" id="swapLLMModelButton"><span class="material-symbols-outlined">api</span></button>
+            <button class="conversation-button-container dangerous-button" id="clearHistoryButton"><span class="material-symbols-outlined">delete_forever</span></button>
+        </div>
+        <hr>
+        <div id ="conversation-sidebar" class="sub-sidebar"></div>
+        <hr>
+        <div id ="character-sidebar" class="sub-sidebar"></div>
     </div>
     <div id="contentContainer" class="container, content">
         <div id="content">
             
         </div>
-        <div id="inputContainer" class="inputContainer">
-            <textarea type="text" cols="5" spellcheck="true" wrap="hard" id="messageInput" class="inputBar" placeholder="Type a message..."></textarea>
+        <div id="input-container" class="input-container">
+            <textarea type="text" cols="5" spellcheck="true" wrap="hard" id="messageInput" class="input-bar" placeholder="Type a message..."></textarea>
             <button id="sendButton" class="button"><span class="material-symbols-outlined">send</span></button>
             <button id="clearButton" class="dangerous-button"><span class="material-symbols-outlined">delete_forever</span></button>
         </div>
