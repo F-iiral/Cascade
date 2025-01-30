@@ -43,7 +43,7 @@ class Database:
         self.conversations.replace_one({"_id": conversation._id}, obj2, upsert=True)
     
     def __load_character(self, data) -> Character:
-        new_character = Character(data["name"], data["description"])
+        new_character = Character(data["name"], data["description"], data["tagline"])
         new_character._id = data["_id"]
         return new_character
     

@@ -192,6 +192,59 @@ def get_all_characters():
     encoded = json.dumps([i.to_json() for i in characters])
     return encoded, 200
 
+@tavern.flask_app.route("/api/account/character", methods=["POST"])
+def edit_character():
+    try:
+        data = json.loads(request.data)
+        data_name = data["name"]
+        data_tagline = data["tagline"]
+        data_description = data["description"]
+
+        new_character = Character(data_name, data_description, data_tagline)
+        database.save_character(new_character)
+        
+        return json.dumps(new_character.to_json()), 200
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
+
+@tavern.flask_app.route("/api/account/character", methods=["PATCH"])
+def create_character():
+    try:
+        data = json.loads(request.data)
+        data_id = data["id"]
+        data_name = data["name"]
+        data_tagline = data["tagline"]
+        data_description = data["description"]
+
+        character = database.get_character(data_id)
+        if character:
+            character.name = data_name if data_name else character.name
+            character.tagline = data_tagline if data_tagline else character.tagline
+            character.description = data_description if data_description else character.description
+            database.save_character(character)
+            return "", 200
+        else:
+            return "", 422
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
+
+@tavern.flask_app.route("/api/account/character", methods=["DELETE"])
+def delete_character():
+    try:
+        data = json.loads(request.data)
+        data_id = data["id"]
+        database.delete_character(data_id)
+
+        return "", 200
+    except KeyError:
+        return "", 400
+    except:
+        return "", 500
+
 @tavern.flask_sock.route("/ws")
 def websocket_route(ws: Server):
     tavern.ws = ws

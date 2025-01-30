@@ -32,7 +32,7 @@ class TavernServer:
 
         self.llama_characters = {x._id:x for x in self.db.get_all_characters()}
         if len(self.llama_characters) == 0:
-            base_assistant = Character("Personal AI Assistant", "You are a personal AI assistant.")
+            base_assistant = Character("Personal AI Assistant", "You are a personal AI assistant.", "A personal AI assistant.")
             self.llama_characters[base_assistant._id] = base_assistant
             self.db.save_character(base_assistant)
         self.llama_current_character = list(self.llama_characters.values())[0]

@@ -87,7 +87,8 @@ body {
 .character-edit-header {
     font-size: 1.2em;
     font-weight: bold;
-    margin-top: 6px;
+    margin: 0px;
+    padding-top: 16px;
     color: var(--white);
     overflow-x: clip;
 }

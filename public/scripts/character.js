@@ -1,4 +1,6 @@
-export function createCharacterElement(id, name, tagline) {
+import { deactiveInputBar, activateInputBar, editCharacter, loadAllMessages, createNewCharacter, deleteCharacter, clearMessagesLocally } from "./listeners.js";
+
+export function createCharacterElement(id, name, description, tagline) {
     const container = document.createElement("div");
     container.className = "character-button-container";
 
@@ -11,7 +13,8 @@ export function createCharacterElement(id, name, tagline) {
     taglineElement.textContent = tagline;
 
     container.onclick = () => {
-        createCharacterEditorElement(id, name, tagline)
+        deactiveInputBar();
+        createCharacterEditorElement(id, name, description, tagline)
     };
 
     container.appendChild(nameElement);
@@ -21,12 +24,10 @@ export function createCharacterElement(id, name, tagline) {
     return container;
 }
 
-export function createCharacterEditorElement(id, name, description) {
-    const parent = document.getElementById("content");
-    parent.innerHTML = "";
-
+function createCharacterInterfaceElement(id, name, description, tagline) {
     const container = document.createElement("div");
 
+    // Name
     const nameContainer = document.createElement("div")
     nameContainer.className = "";
 
@@ -47,12 +48,34 @@ export function createCharacterEditorElement(id, name, description) {
     nameContainer.append(nameHeader)
     nameContainer.append(nameEdit)
 
+    // Tagline
+    const taglineContainer = document.createElement("div")
+    taglineContainer.className = "";
+
+    const taglineHeader = document.createElement("p");
+    taglineHeader.className = "character-edit-header"
+    taglineHeader.textContent = "Character Tagline"
+
+    const taglineEdit = document.createElement("textarea");
+    taglineEdit.value = tagline;
+    taglineEdit.placeholder = tagline;
+    taglineEdit.id = `taglineEdit-${id}`;
+    taglineEdit.className = "input-bar-character-editor";
+    taglineEdit.cols = 5;
+    taglineEdit.rows = 1;
+    taglineEdit.wrap = "hard";
+    taglineEdit.spellcheck = "true";
+
+    taglineContainer.append(taglineHeader)
+    taglineContainer.append(taglineEdit)
+
+    // Description
     const descriptionContainer = document.createElement("div")
     nameContainer.className = "";
 
     const descriptionHeader = document.createElement("p");
-    descriptionHeader.textContent = "Character Description"
     descriptionHeader.className = "character-edit-header"
+    descriptionHeader.textContent = "Character Description"
 
     const descriptionEdit = document.createElement("textarea")
     descriptionEdit.value = description;
@@ -68,16 +91,28 @@ export function createCharacterEditorElement(id, name, description) {
     descriptionContainer.append(descriptionHeader)
     descriptionContainer.append(descriptionEdit)
 
-    // Buttons container
+    container.append(nameContainer)
+    container.append(taglineContainer)
+    container.append(descriptionContainer)
+
+    return container;
+}
+export function createCharacterEditorElement(id, name, description, tagline) {
+    const parent = document.getElementById("content");
+    parent.innerHTML = "";
+
+    const container = createCharacterInterfaceElement(id, name, description, tagline);
+
     const buttonsContainer = document.createElement("div")
     buttonsContainer.className = "button-container"
+    buttonsContainer.style = "width: 60vw;"
 
     const editButton = document.createElement("button");
     editButton.className = "button";
-    editButton.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+    editButton.innerHTML = '<span class="material-symbols-outlined">save</span>';
     editButton.onclick = (event) => {
         event.stopPropagation();
-        console.log("saving :3")
+        editCharacter(id);
     };
 
     const cancelButton = document.createElement("button");
@@ -85,7 +120,8 @@ export function createCharacterEditorElement(id, name, description) {
     cancelButton.innerHTML = '<span class="material-symbols-outlined">cancel</span>';
     cancelButton.onclick = (event) => {
         event.stopPropagation();
-        console.log("canceling :3")
+        activateInputBar();
+        loadAllMessages();
     };
 
     const deleteButton = document.createElement("button");
@@ -93,15 +129,52 @@ export function createCharacterEditorElement(id, name, description) {
     deleteButton.innerHTML = '<span class="material-symbols-outlined dangerous-button">delete</span>';
     deleteButton.onclick = (event) => {
         event.stopPropagation();
-        console.log("delete :3")
+        deleteCharacter(id);
+        clearMessagesLocally();
+        loadAllMessages();
+        activateInputBar();
     };
 
     buttonsContainer.appendChild(editButton);
     buttonsContainer.appendChild(cancelButton);
     buttonsContainer.appendChild(deleteButton);
 
-    container.append(nameContainer)
-    container.append(descriptionContainer)
+    container.append(buttonsContainer)
+    parent.append(container)
+
+    return container;
+}
+export function createCharacterCreatorElement() {
+    const parent = document.getElementById("content");
+    parent.innerHTML = "";
+
+    // TODO: need better names
+    const container = createCharacterInterfaceElement("new", "Character Name", "Character Description", "Character Tagline");
+
+    const buttonsContainer = document.createElement("div")
+    buttonsContainer.className = "button-container"
+    buttonsContainer.style = "width: 60vw;"
+
+    const editButton = document.createElement("button");
+    editButton.className = "button";
+    editButton.innerHTML = '<span class="material-symbols-outlined">save</span>';
+    editButton.onclick = (event) => {
+        event.stopPropagation();
+        createNewCharacter();
+    };
+
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "button";
+    cancelButton.innerHTML = '<span class="material-symbols-outlined">cancel</span>';
+    cancelButton.onclick = (event) => {
+        event.stopPropagation();
+        activateInputBar();
+        loadAllMessages();
+    };
+
+    buttonsContainer.appendChild(editButton);
+    buttonsContainer.appendChild(cancelButton);
+
     container.append(buttonsContainer)
     parent.append(container)
 
