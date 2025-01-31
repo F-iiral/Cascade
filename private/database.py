@@ -45,6 +45,7 @@ class Database:
     def __load_character(self, data) -> Character:
         new_character = Character(data["name"], data["description"], data["tagline"])
         new_character._id = data["_id"]
+        new_character.avatarLink = data["avatarLink"]
         return new_character
     
     def __load_conversation(self, data) -> Conversation:
@@ -55,8 +56,19 @@ class Database:
             new_message._id = message["id"]
             parsed_messages[message["id"]] = new_message
 
-        new_conversation = Conversation([self.get_character(i) for i in data["characters"]], parsed_messages, data["name"])
+        new_conversation = Conversation([], parsed_messages, data["name"])
         new_conversation._id = data["_id"]
+
+        for character_id in data["characters"]:
+            character = self.get_character(character_id)
+            if character == None:
+                continue
+
+            new_conversation.characters.append(character)
+        if len(new_conversation.characters) == 0:
+            new_conversation.characters = [Character.get_base_character()]
+
+
         return new_conversation
     
     def get_character(self, id: int) -> Character | None:

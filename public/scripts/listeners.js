@@ -2,6 +2,7 @@ import { createMessageElement } from "./message.js";
 import { getConversationId, setConversationId, setUserTurnState } from "./main.js";
 import { createConversationElement } from "./conversations.js";
 import { createCharacterCreatorElement, createCharacterElement } from "./character.js";
+import { getUploadedImageLink } from "./avatar.js";
 
 let lastEnterPressTime = 0;
 let isInputBarActive = true;
@@ -20,7 +21,10 @@ document.addEventListener('keydown', (event) => {
 
 document.getElementById('sendButton').addEventListener('click', createNewUserMessage);
 document.getElementById('clearButton').addEventListener('click', clearMessages);
-document.getElementById('newConversationButton').addEventListener('click', startNewConversation);
+document.getElementById('newConversationButton').addEventListener('click', () => {
+    startNewConversation();
+    activateInputBar();
+});
 document.getElementById('newCharacterButton').addEventListener('click', () => {
     createCharacterCreatorElement(); 
     deactiveInputBar();
@@ -137,7 +141,7 @@ export function loadAllCharacters() {
                 continue
          
             const containerDiv = document.createElement("div")
-            const characterElement = createCharacterElement(character.id, character.name, character.description, character.tagline);
+            const characterElement = createCharacterElement(character.id, character.name, character.description, character.tagline, character.avatar);
             containerDiv.appendChild(characterElement)
             containerDiv.id = character.id
 
@@ -467,10 +471,11 @@ export function deleteConversation(id) {
     });
 }
 
-export function createNewCharacter() {
-    const name = document.getElementById(`nameEdit-new`).value ?? " ";
-    const tagline = document.getElementById(`taglineEdit-new`).value ?? " ";
-    const description = document.getElementById(`descriptionEdit-new`).value ?? " ";
+export async function createNewCharacter() {
+    const name = document.getElementById(`nameEdit-new`).value;
+    const tagline = document.getElementById(`taglineEdit-new`).value;
+    const description = document.getElementById(`descriptionEdit-new`).value;
+    const image = await getUploadedImageLink();
 
     fetch('api/account/character', {
         method: 'POST',
@@ -481,7 +486,8 @@ export function createNewCharacter() {
             {
                 "name": name,
                 "tagline": tagline,
-                "description": description
+                "description": description,
+                "avatar": image.fp
             }
         )
     })
@@ -497,10 +503,11 @@ export function createNewCharacter() {
         console.error('Error sending message:', error);
     });
 }
-export function editCharacter(id) {
-    const newName = document.getElementById(`nameEdit-${id}`).value ?? " ";
-    const newTagline = document.getElementById(`taglineEdit-${id}`).value ?? " ";
-    const newDescription = document.getElementById(`descriptionEdit-${id}`).value ?? " ";
+export async function editCharacter(id) {
+    const newName = document.getElementById(`nameEdit-${id}`);
+    const newTagline = document.getElementById(`taglineEdit-${id}`);
+    const newDescription = document.getElementById(`descriptionEdit-${id}`);
+    const image = await getUploadedImageLink();
 
     fetch('api/account/character', {
         method: 'PATCH',
@@ -512,7 +519,8 @@ export function editCharacter(id) {
                 "id": id,
                 "name": newName,
                 "tagline": newTagline,
-                "description": newDescription
+                "description": newDescription,
+                "avatar": image.fp
             }
         )
     })

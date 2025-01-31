@@ -1,4 +1,4 @@
-import { switchConversation, editConversation, deleteConversation } from "./listeners.js";
+import { switchConversation, editConversation, deleteConversation, activateInputBar } from "./listeners.js";
 
 export function createConversationElement(id, name, characters) {
     const container = document.createElement("div");
@@ -13,6 +13,7 @@ export function createConversationElement(id, name, characters) {
     charactersPreview.textContent = characters.map(char => char.name).join(", ");
 
     container.onclick = () => {
+        activateInputBar();
         switchConversation(id);
     };
 

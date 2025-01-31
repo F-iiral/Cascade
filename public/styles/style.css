@@ -202,7 +202,16 @@ body {
     font-size: 0.75em;
     color: var(--grey-even-lighter-than-lightest);
 }
-
+.character-info {
+    display: flex;
+    align-items: center;
+}
+.character-avatar {
+    width: 64px;
+    margin-right: 10px;
+    border: 4px;
+    border-radius: 4px;
+}
 
 hr {
     margin-top: 16px;

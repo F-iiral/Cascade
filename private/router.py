@@ -3,12 +3,17 @@ from private.common.message_wrapper import MessageWrapper
 from private.common.character import Character
 from private.common.conversation import Conversation
 from private.database import Database
-from flask import render_template, request
+from flask import render_template, send_file, request
 from flask_sock import Server
 from simple_websocket import ConnectionClosed
+from werkzeug.utils import secure_filename
+from PIL import Image
 import json
 import copy
+import os
+import time
 
+UPLOAD_FOLDER = "./uploads"
 tavern = TavernServer.get()
 database = Database.get()
 
@@ -199,10 +204,12 @@ def edit_character():
         data_name = data["name"]
         data_tagline = data["tagline"]
         data_description = data["description"]
+        data_avatar = data["avatar"]
 
         new_character = Character(data_name, data_description, data_tagline)
+        new_character.avatarLink = data_avatar
         database.save_character(new_character)
-        
+
         return json.dumps(new_character.to_json()), 200
     except KeyError:
         return "", 400
@@ -217,12 +224,14 @@ def create_character():
         data_name = data["name"]
         data_tagline = data["tagline"]
         data_description = data["description"]
+        data_avatar = data["avatar"]
 
         character = database.get_character(data_id)
         if character:
             character.name = data_name if data_name else character.name
             character.tagline = data_tagline if data_tagline else character.tagline
             character.description = data_description if data_description else character.description
+            character.avatarLink = data_avatar if data_avatar else character.avatarLink
             database.save_character(character)
             return "", 200
         else:
@@ -244,6 +253,29 @@ def delete_character():
         return "", 400
     except:
         return "", 500
+
+@tavern.flask_app.route('/image/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return "", 400
+
+    image = request.files['image']
+    filename = secure_filename(f"{int(time.time())}")
+    filename = os.path.splitext(filename)[0] + ".png"
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+    img = Image.open(image)
+    img = img.resize((256, 256))
+    img.save(filepath, format="PNG")
+
+    return json.dumps({"fp": filename})
+
+@tavern.flask_app.route('/image/<path:image_id>', methods=['GET'])
+def get_image(image_id):
+    image_path = os.path.join(UPLOAD_FOLDER, image_id)
+    if not os.path.exists(image_path):
+        return "", 404
+    return send_file("../" + image_path, mimetype='image/png')
 
 @tavern.flask_sock.route("/ws")
 def websocket_route(ws: Server):
