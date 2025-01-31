@@ -231,7 +231,7 @@ def create_character():
             character.name = data_name if data_name else character.name
             character.tagline = data_tagline if data_tagline else character.tagline
             character.description = data_description if data_description else character.description
-            character.avatarLink = data_description if data_avatar else character.avatarLink
+            character.avatarLink = data_avatar if data_avatar else character.avatarLink
             database.save_character(character)
             return "", 200
         else:
