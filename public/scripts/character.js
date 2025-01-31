@@ -1,8 +1,27 @@
 import { deactiveInputBar, activateInputBar, editCharacter, loadAllMessages, createNewCharacter, deleteCharacter, clearMessagesLocally } from "./listeners.js";
 
-export function createCharacterElement(id, name, description, tagline) {
+export function createCharacterElement(id, name, description, tagline, avatar) {
     const container = document.createElement("div");
     container.className = "character-button-container";
+
+    const infoContainer = document.createElement("div");
+    infoContainer.className = "character-info";
+
+    let avatarElement;
+    if (avatar != null) {
+        avatarElement = document.createElement("img");
+        avatarElement.src = `image/${avatar}`;
+        avatarElement.className = "character-avatar";
+    }
+    else {
+        avatarElement = document.createElement("span");
+        avatarElement.innerHTML = "person";
+        avatarElement.className = "material-symbols-outlined character-avatar";
+        avatarElement.style.fontSize = "64px";
+    }
+
+    const textContainer = document.createElement("div");
+    textContainer.className = "character-text";
 
     const nameElement = document.createElement("div");
     nameElement.className = "character-name";
@@ -14,18 +33,63 @@ export function createCharacterElement(id, name, description, tagline) {
 
     container.onclick = () => {
         deactiveInputBar();
-        createCharacterEditorElement(id, name, description, tagline)
+        createCharacterEditorElement(id, name, description, tagline, avatar);
     };
 
-    container.appendChild(nameElement);
-    container.appendChild(taglineElement);
-    container.appendChild(taglineElement);
+    textContainer.appendChild(nameElement);
+    textContainer.appendChild(taglineElement);
+    
+    infoContainer.appendChild(avatarElement);
+    infoContainer.appendChild(textContainer);
+    
+    container.appendChild(infoContainer);
 
     return container;
 }
 
-function createCharacterInterfaceElement(id, name, description, tagline) {
+function createCharacterInterfaceElement(title, id, name, description, tagline, avatar) {
     const container = document.createElement("div");
+
+    // Title
+    const titleText = document.createElement("h1");
+    titleText.textContent = title
+
+    // Avatar
+    const avatarOuterContainer = document.createElement("div")
+    const avatarInnerContainer = document.createElement("div")
+    avatarOuterContainer.className = "";
+    avatarInnerContainer.className = "character-info";
+
+    let avatarElement;
+    if (avatar != null) {
+        avatarElement = document.createElement("img");
+        avatarElement.src = `image/${avatar}`;
+        avatarElement.className = "character-avatar";
+    }
+    else {
+        avatarElement = document.createElement("span");
+        avatarElement.innerHTML = "person";
+        avatarElement.className = "material-symbols-outlined character-avatar";
+        avatarElement.style.fontSize = "64px";
+    }
+
+    const avatarHeader = document.createElement("p");
+    avatarHeader.className = "character-edit-header"
+    avatarHeader.textContent = "Character Avatar"
+
+    const avatarText = document.createElement("p");
+    avatarText.textContent = "The Avatar for your character. This will accept any image file. Recommended size is atleast 256x256."
+
+    const avatarInput = document.createElement("input");
+    avatarInput.type = "file";
+    avatarInput.accept = "image/*";
+    avatarInput.id = "image-input";
+
+    avatarInnerContainer.append(avatarElement)
+    avatarInnerContainer.append(avatarInput)
+    avatarOuterContainer.append(avatarHeader)
+    avatarOuterContainer.append(avatarText)
+    avatarOuterContainer.append(avatarInnerContainer)
 
     // Name
     const nameContainer = document.createElement("div")
@@ -91,17 +155,19 @@ function createCharacterInterfaceElement(id, name, description, tagline) {
     descriptionContainer.append(descriptionHeader)
     descriptionContainer.append(descriptionEdit)
 
+    container.append(titleText)
+    container.append(avatarOuterContainer)
     container.append(nameContainer)
     container.append(taglineContainer)
     container.append(descriptionContainer)
 
     return container;
 }
-export function createCharacterEditorElement(id, name, description, tagline) {
+export function createCharacterEditorElement(id, name, description, tagline, avatar) {
     const parent = document.getElementById("content");
     parent.innerHTML = "";
 
-    const container = createCharacterInterfaceElement(id, name, description, tagline);
+    const container = createCharacterInterfaceElement(`Editing "${name}"..`, id, name, description, tagline, avatar);
 
     const buttonsContainer = document.createElement("div")
     buttonsContainer.className = "button-container"
@@ -110,9 +176,9 @@ export function createCharacterEditorElement(id, name, description, tagline) {
     const editButton = document.createElement("button");
     editButton.className = "button";
     editButton.innerHTML = '<span class="material-symbols-outlined">save</span>';
-    editButton.onclick = (event) => {
+    editButton.onclick = async (event) => {
         event.stopPropagation();
-        editCharacter(id);
+        await editCharacter(id);
     };
 
     const cancelButton = document.createElement("button");
@@ -149,7 +215,7 @@ export function createCharacterCreatorElement() {
     parent.innerHTML = "";
 
     // TODO: need better names
-    const container = createCharacterInterfaceElement("new", "Character Name", "Character Description", "Character Tagline");
+    const container = createCharacterInterfaceElement(`Creating a new Character..`, "new", "Character Name", "Character Description", "Character Tagline", null);
 
     const buttonsContainer = document.createElement("div")
     buttonsContainer.className = "button-container"
@@ -158,9 +224,10 @@ export function createCharacterCreatorElement() {
     const editButton = document.createElement("button");
     editButton.className = "button";
     editButton.innerHTML = '<span class="material-symbols-outlined">save</span>';
-    editButton.onclick = (event) => {
+    editButton.onclick = async (event) => {
         event.stopPropagation();
-        createNewCharacter();
+        console.log(":3")
+        await createNewCharacter();
     };
 
     const cancelButton = document.createElement("button");
