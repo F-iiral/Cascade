@@ -1,4 +1,4 @@
-import { deactiveInputBar, activateInputBar, editCharacter, loadAllMessages, createNewCharacter, deleteCharacter, clearMessagesLocally } from "./listeners.js";
+import { deactiveInputBar, activateInputBar, editCharacter, loadAllMessages, createNewCharacter, deleteCharacter, selectCharacter, clearMessagesLocally } from "./listeners.js";
 
 export function createCharacterElement(id, name, description, tagline, avatar) {
     const container = document.createElement("div");
@@ -226,7 +226,6 @@ export function createCharacterCreatorElement() {
     editButton.innerHTML = '<span class="material-symbols-outlined">save</span>';
     editButton.onclick = async (event) => {
         event.stopPropagation();
-        console.log(":3")
         await createNewCharacter();
     };
 
@@ -246,4 +245,86 @@ export function createCharacterCreatorElement() {
     parent.append(container)
 
     return container;
+}
+
+export async function createCharacterSelectorElement() {
+    const parent = document.getElementById("content");
+    parent.style.pointerEvents = "none";
+    parent.style.opacity = "0.3";
+
+    const overlay = document.createElement("div");
+    overlay.className = "overlay";
+
+    const selectorContainer = document.createElement("div");
+    selectorContainer.className = "character-selector";
+
+    const title = document.createElement("h2");
+    title.innerText = "Select a Character";
+    selectorContainer.appendChild(title);
+
+    const characterList = document.createElement("div");
+    characterList.className = "character-list";
+
+    try {
+        const characters = await fetch('api/account/character', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        });
+
+        characters.forEach(character => {
+            const label = document.createElement("label");
+            const outerContainer = document.createElement("div");
+            const innerContainer = document.createElement("div");
+            outerContainer.className = "character-selector-outer";
+            innerContainer.className = "character-selector-inner";
+
+            const radioButton = document.createElement("input");
+            radioButton.type = "radio";
+            radioButton.name = "character";
+            radioButton.value = character.id;
+            radioButton.onclick = () => {
+                selectCharacter(character.id);
+                document.body.removeChild(overlay);
+                parent.style.pointerEvents = "auto";
+                parent.style.opacity = "1";
+            };
+            
+            let avatarElement;
+            if (character.avatar != null) {
+                avatarElement = document.createElement("img");
+                avatarElement.src = `image/${character.avatar}`;
+                avatarElement.className = "character-avatar-small";
+            }
+            else {
+                avatarElement = document.createElement("span");
+                avatarElement.innerHTML = "person";
+                avatarElement.className = "material-symbols-outlined character-avatar-small";
+                avatarElement.style.fontSize = "64px";
+            }        
+            
+            const nameSpan = document.createElement("span");
+            nameSpan.innerText = character.name;
+            
+            innerContainer.appendChild(avatarElement);
+            innerContainer.appendChild(nameSpan);
+            outerContainer.appendChild(radioButton);
+            outerContainer.appendChild(innerContainer);
+            label.appendChild(outerContainer);
+            
+            characterList.appendChild(label);
+        });
+    } catch (error) {
+        console.error("Failed to fetch characters:", error);
+    }
+
+    selectorContainer.appendChild(characterList);
+    overlay.appendChild(selectorContainer);
+    document.body.appendChild(overlay);
 }
