@@ -29,6 +29,17 @@ body {
     height: 100%;
 }
 
+.overlay {
+    position: fixed; 
+    top: 0;
+    left: 0; 
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .container {
     display: flex;
     height: 100vh;
@@ -211,6 +222,30 @@ body {
     margin-right: 10px;
     border: 4px;
     border-radius: 4px;
+}
+.character-avatar-small {
+    width: 408x;
+    height: 48px;
+    border: 4px;
+    border-radius: 4px;
+}
+.character-selector {
+    background: var(--grey-lighter);
+    padding: 20px;
+    border-radius: 10px;
+    width: 50vw;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+.character-selector-outer {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75vw;
+}
+.character-selector-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.75vw;
 }
 
 hr {
