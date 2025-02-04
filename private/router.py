@@ -76,27 +76,6 @@ def edit_message():
     except:
         return "", 500
 
-@tavern.flask_app.route("/api/conversation/character", methods=["POST"])
-def change_character():
-    try:
-        data = json.loads(request.data)
-        data_id = data["id"]
-        
-        new_character = database.get_character(data_id)
-
-        if not new_character:
-            return "", 422
-        
-        tavern.llama_current_character = new_character
-        tavern.conversation.characters = [new_character] # No Group Chats yet
-        database.save_conversation(tavern.conversation)
-
-        return json.dumps(tavern.llama_current_character.to_json()), 200
-    except KeyError:
-        return "", 400
-    except:
-        return "", 500
-
 @tavern.flask_app.route("/api/conversation/retry", methods=["POST"])
 def retry_conversation():
     try:

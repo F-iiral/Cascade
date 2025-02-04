@@ -18,7 +18,6 @@ Cascade is a lightweight, locally hosted webinterface for Ollama made using Pyth
 ## Progress
 - [x] Basic Features
 - [x] Multiple Conversations
-- [x] Characters 
+- [ ] Characters 
 - [ ] Switching AI Models
-- [ ] Group Conversations
 - [ ] Image support (?)
