@@ -1,7 +1,7 @@
 import { createMessageElement } from "./message.js";
 import { getConversationId, setConversationId, setUserTurnState } from "./main.js";
 import { createConversationElement } from "./conversations.js";
-import { createCharacterCreatorElement, createCharacterElement } from "./character.js";
+import { createCharacterCreatorElement, createCharacterElement, createCharacterSelectorElement } from "./character.js";
 import { getUploadedImageLink } from "./avatar.js";
 
 let lastEnterPressTime = 0;
@@ -27,6 +27,10 @@ document.getElementById('newConversationButton').addEventListener('click', () =>
 });
 document.getElementById('newCharacterButton').addEventListener('click', () => {
     createCharacterCreatorElement(); 
+    deactiveInputBar();
+});
+document.getElementById('changeCharacterButton').addEventListener('click', async () => {
+    await createCharacterSelectorElement(); 
     deactiveInputBar();
 });
 
@@ -563,7 +567,31 @@ export function deleteCharacter(id) {
         console.error('Error sending message:', error);
     });
 }
+export function selectCharacter(id) {
+    const parent = document.getElementById("character-sidebar")
 
+    fetch('api/conversation/character', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "id": id
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        activateInputBar();
+        clearConversationsLocally();
+        loadAllConversations();
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
+
+}
 
 export function clearMessages() {
     fetch('api/conversation/clear', {
@@ -589,6 +617,26 @@ export function clearMessagesLocally() {
     const newMessage = document.createElement("div");
     newMessage.id = "newMessage";
     parent.append(newMessage)
+
+    setUserTurnState(true);
+}
+export function clearCharactersLocally() {
+    const parent = document.getElementById("character-sidebar");
+    parent.innerHTML = "";
+
+    const newCharacter = document.createElement("div");
+    newCharacter.id = "newCharacter";
+    parent.append(newCharacter)
+
+    setUserTurnState(true);
+}
+export function clearConversationsLocally() {
+    const parent = document.getElementById("conversation-sidebar");
+    parent.innerHTML = "";
+
+    const newConversation = document.createElement("div");
+    newConversation.id = "newConversation";
+    parent.append(newConversation)
 
     setUserTurnState(true);
 }
